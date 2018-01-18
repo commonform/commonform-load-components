@@ -24,13 +24,22 @@ var runParallelLimit = require('run-parallel-limit')
 var substitute = require('commonform-substitute')
 
 module.exports = function (form, options, callback) {
+  // Request Caching
+  var caches = options.caches || {}
+  caches.forms = caches.forms || {}
+  caches.publications = caches.publications || {}
+  caches.editions = caches.editions || {}
+  var loadEditions = cachedLoader(caches.publications, getEditions)
+  var loadPublication = cachedLoader(caches.publications, getPublication)
+  var loadForm = cachedLoader(caches.forms, getForm)
+
   runParallelLimit(
     form.content.map(function (element) {
       return function (done) {
         if (element.hasOwnProperty('repository')) {
           if (element.upgrade) {
             // Fetch a list of available editions of the project.
-            getEditions(
+            loadEditions(
               element.repository,
               element.publisher,
               element.project,
@@ -85,32 +94,65 @@ module.exports = function (form, options, callback) {
       callback(null, form)
     }
   )
+
+  function getPublicationFormAsChild (
+    element,
+    repository, publisher, project, edition,
+    callback
+  ) {
+    loadPublication(
+      repository, publisher, project, edition,
+      function (error, publication) {
+        if (error) return callback(error)
+        if (publication === false) return callback(couldNotLoad(element))
+        loadForm(repository, publication.digest, function (error, form) {
+          if (error) return callback(error)
+          var result = {form: substitute(form, element.substitutions)}
+          if (element.heading) result.heading = element.heading
+          callback(null, result)
+        })
+      }
+    )
+  }
+
+  function cachedLoader (cache, get) {
+    // Number of non-callback arguments `get` takes:
+    var arity = get.length - 1
+    return function (/* ... */) {
+      var args = Array.prototype.slice.call(arguments)
+      var query = args.slice(0, arity)
+      var callback = args[arity]
+      if (cache.get) {
+        cache.get.apply(cache, query.concat(function (error, data) {
+          if (error || data === false) {
+            get.apply(null, query.concat(finish))
+          } else {
+            finish(null, data)
+          }
+        }))
+      } else {
+        get.apply(null, query.concat(finish))
+      }
+
+      function finish (error, data) {
+        if (error) return callback(error)
+        if (data === false) return callback(null, false)
+        if (cache.put) {
+          cache.put.apply(cache, query.concat(data).concat(function () {
+            callback(null, data)
+          }))
+        } else {
+          callback(null, data)
+        }
+      }
+    }
+  }
 }
 
 function couldNotLoad (element) {
   var returned = new Error('could not load component')
   returned.component = element
   return returned
-}
-
-function getPublicationFormAsChild (
-  element,
-  repository, publisher, project, edition,
-  callback
-) {
-  getPublication(
-    repository, publisher, project, edition,
-    function (error, publication) {
-      if (error) return callback(error)
-      if (publication === false) return callback(couldNotLoad(element))
-      getForm(repository, publication.digest, function (error, form) {
-        if (error) return callback(error)
-        var result = {form: substitute(form, element.substitutions)}
-        if (element.heading) result.heading = element.heading
-        callback(null, result)
-      })
-    }
-  )
 }
 
 function getEditions (host, publisher, project, callback) {
