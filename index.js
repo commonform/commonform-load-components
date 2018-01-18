@@ -24,6 +24,8 @@ var runParallelLimit = require('run-parallel-limit')
 var substitute = require('commonform-substitute')
 var xtend = require('xtend')
 
+var DEFAULT_PARALLEL_LIMIT = 5
+
 module.exports = function load (form, options, callback) {
   // Internal Recursive State
   options.resolutions = options.resolutions || []
@@ -95,7 +97,7 @@ module.exports = function load (form, options, callback) {
         }
       }
     }),
-    options.limit || 5,
+    options.limit || DEFAULT_PARALLEL_LIMIT,
     function (error, results) {
       if (error) return callback(error)
       form.content = results
