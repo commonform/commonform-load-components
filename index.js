@@ -115,7 +115,7 @@ function getPublicationFormAsChild (
 
 function getEditions (host, publisher, project, callback) {
   https.request({
-    host: 'api.commonform.org',
+    host: host,
     path: (
       '/publishers/' + publisher +
       '/projects/' + project +
