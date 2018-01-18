@@ -25,7 +25,11 @@ var substitute = require('commonform-substitute')
 var xtend = require('xtend')
 
 module.exports = function load (form, options, callback) {
+  // Internal Recursive State
+  options.resolutions = options.resolutions || []
   options.loaded = options.loaded || []
+  options.path = options.path || []
+
   // Request Caching
   var caches = options.caches || {}
   caches.forms = caches.forms || {}
@@ -36,10 +40,16 @@ module.exports = function load (form, options, callback) {
   var loadForm = cachedLoader(caches.forms, getForm)
 
   runParallelLimit(
-    form.content.map(function (element) {
+    form.content.map(function (element, index) {
       return function (done) {
         if (element.hasOwnProperty('repository')) {
           if (element.upgrade) {
+            var path = options.path.concat('content', index)
+            // Check for a provided resolution.
+            var resolution = options.resolutions.find(function (resolution) {
+              return isSamePath(path, resolution.path)
+            })
+            if (resolution) return withEdition(resolution.edition)
             // Fetch a list of available editions of the project.
             loadEditions(
               element.repository,
@@ -63,29 +73,25 @@ module.exports = function load (form, options, callback) {
                 var resolved = matchingEditions
                   .sort(revedCompare)
                   .reverse()[0]
-                // Load that form.
-                getPublicationFormAsChild(
-                  element,
-                  element.repository,
-                  element.publisher,
-                  element.project,
-                  resolved,
-                  done
-                )
+                withEdition(resolved)
               }
             )
           } else {
-            getPublicationFormAsChild(
-              element,
-              element.repository,
-              element.publisher,
-              element.project,
-              element.edition,
-              done
-            )
+            withEdition(element.edition)
           }
         } else {
           done(null, element)
+        }
+
+        function withEdition (edition) {
+          getPublicationFormAsChild(
+            element,
+            element.repository,
+            element.publisher,
+            element.project,
+            edition,
+            done
+          )
         }
       }
     }),
@@ -199,4 +205,15 @@ function getEditions (host, publisher, project, callback) {
         })
     })
     .end()
+}
+
+function isSamePath (a, b) {
+  return (
+    Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every(function (element, index) {
+      return element === b[index]
+    })
+  )
 }

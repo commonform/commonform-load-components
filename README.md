@@ -72,6 +72,52 @@ loadComponents(
   }
 )
 
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        edition: '1e',
+        upgrade: 'yes',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {
+    resolutions: [
+      {
+        path: ['content', 0],
+        edition: '1e'
+      }
+    ]
+  },
+  function (error, upgradedForm) {
+    assert.ifError(error)
+    loadComponents(
+      {
+        content: [
+          {
+            repository: 'api.commonform.org',
+            publisher: 'kemitchell',
+            project: 'legal-action',
+            edition: '1e',
+            substitutions: {terms: {}, headings: {}}
+          }
+        ]
+      },
+      {limit: 1},
+      function (error, fixedForm) {
+        assert.ifError(error)
+        assert.deepStrictEqual(
+          upgradedForm, fixedForm
+        )
+      }
+    )
+  }
+)
+
 var cyclicalComponent = {
   repository: 'api.commonform.org',
   publisher: 'kemitchell',
