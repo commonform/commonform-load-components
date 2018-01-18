@@ -140,7 +140,7 @@ module.exports = function load (form, options, callback) {
   function cachedLoader (cache, get) {
     // Number of non-callback arguments `get` takes:
     var arity = get.length - 1
-    return function (/* ... */) {
+    return function (/* arguments */) {
       var args = Array.prototype.slice.call(arguments)
       var query = args.slice(0, arity)
       var callback = args[arity]
