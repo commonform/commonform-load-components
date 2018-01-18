@@ -23,7 +23,7 @@ var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
 var substitute = require('commonform-substitute')
 
-module.exports = function (form, options, callback) {
+module.exports = function load (form, options, callback) {
   // Request Caching
   var caches = options.caches || {}
   caches.forms = caches.forms || {}
@@ -107,9 +107,12 @@ module.exports = function (form, options, callback) {
         if (publication === false) return callback(couldNotLoad(element))
         loadForm(repository, publication.digest, function (error, form) {
           if (error) return callback(error)
-          var result = {form: substitute(form, element.substitutions)}
-          if (element.heading) result.heading = element.heading
-          callback(null, result)
+          load(form, options, function (error, form) {
+            if (error) return callback(error)
+            var result = {form: substitute(form, element.substitutions)}
+            if (element.heading) result.heading = element.heading
+            callback(null, result)
+          })
         })
       }
     )
