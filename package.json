@@ -15,11 +15,14 @@
   },
   "devDependencies": {
     "defence-cli": "^2.0.1",
-    "replace-require-self": "^1.1.1"
+    "replace-require-self": "^1.1.1",
+    "standard": "^10.0.3",
+    "standard-markdown": "^4.0.2"
   },
   "license": "Apache-2.0",
   "repository": "commonform/commonform-load-components",
   "scripts": {
-    "test": "defence -i javascript README.md | replace-require-self | node"
+    "test": "defence -i javascript README.md | replace-require-self | node",
+    "lint": "standard && standard-markdown"
   }
 }
