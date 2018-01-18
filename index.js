@@ -180,25 +180,23 @@ function getEditions (host, publisher, project, callback) {
   })
     .once('response', function (response) {
       var statusCode = response.statusCode
-      if (statusCode === 404) {
-        callback(null, false)
-      } else if (statusCode !== 200) {
-        var error = new Error()
-        error.statusCode = statusCode
-        callback(error)
-      } else {
-        var chunks = []
-        response
-          .on('data', function (chunk) {
-            chunks.push(chunk)
-          })
-          .once('error', function (error) {
-            callback(error)
-          })
-          .once('end', function () {
-            parse(Buffer.concat(chunks), callback)
-          })
+      if (statusCode === 404) return callback(null, false)
+      if (statusCode !== 200) {
+        var statusError = new Error()
+        statusError.statusCode = statusCode
+        return callback(statusError)
       }
+      var chunks = []
+      response
+        .on('data', function (chunk) {
+          chunks.push(chunk)
+        })
+        .once('error', function (error) {
+          callback(error)
+        })
+        .once('end', function () {
+          parse(Buffer.concat(chunks), callback)
+        })
     })
     .end()
 }
