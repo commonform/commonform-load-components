@@ -5,6 +5,7 @@
   "dependencies": {
     "commonform-get-form": "^2.0.0",
     "commonform-get-publication": "^2.0.0",
+    "commonform-substitute": "^1.0.0",
     "json-parse-errback": "^2.0.1",
     "reviewers-edition-compare": "^1.0.5",
     "reviewers-edition-upgrade": "^1.0.2",

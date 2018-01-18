@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 var getForm = require('commonform-get-form')
 var getPublication = require('commonform-get-publication')
 var https = require('https')
@@ -20,6 +21,7 @@ var parse = require('json-parse-errback')
 var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
+var substitute = require('commonform-substitute')
 
 module.exports = function (form, options, callback) {
   runParallelLimit(
@@ -103,7 +105,7 @@ function getPublicationFormAsChild (
       if (publication === false) return callback(couldNotLoad(element))
       getForm(repository, publication.digest, function (error, form) {
         if (error) return callback(error)
-        var result = {form: form}
+        var result = {form: substitute(form, element.substitutions)}
         if (element.heading) result.heading = element.heading
         callback(null, result)
       })
