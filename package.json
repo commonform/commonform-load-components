@@ -22,7 +22,7 @@
   "license": "Apache-2.0",
   "repository": "commonform/commonform-load-components",
   "scripts": {
-    "test": "defence -i javascript README.md | replace-require-self | node",
-    "lint": "standard && standard-markdown"
+    "lint": "standard && standard-markdown",
+    "test": "defence -i javascript README.md | replace-require-self | node"
   }
 }
