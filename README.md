@@ -1,7 +1,11 @@
 ```javascript
 var assert = require('assert')
 var loadComponents = require('commonform-load-components')
+```
 
+Replace a component with a child form:
+
+```javascript
 loadComponents(
   {
     content: [
@@ -32,7 +36,11 @@ loadComponents(
     })
   }
 )
+```
 
+Automatically resolve `upgrade: true` components to the latest compatible edition:
+
+```javascript
 loadComponents(
   {
     content: [
@@ -40,6 +48,7 @@ loadComponents(
         repository: 'api.commonform.org',
         publisher: 'kemitchell',
         project: 'legal-action',
+        // Use 1e, but upgrade if possible.
         edition: '1e',
         upgrade: 'yes',
         substitutions: {terms: {}, headings: {}}
@@ -56,6 +65,7 @@ loadComponents(
             repository: 'api.commonform.org',
             publisher: 'kemitchell',
             project: 'legal-action',
+            // Use 1e1c specifically.
             edition: '1e1c',
             substitutions: {terms: {}, headings: {}}
           }
@@ -71,7 +81,11 @@ loadComponents(
     )
   }
 )
+```
 
+You can provide precalculated resolutions for `upgrade: true` components:
+
+```javascript
 loadComponents(
   {
     content: [
@@ -117,7 +131,11 @@ loadComponents(
     )
   }
 )
+```
 
+The function will yield an error when a component tries to incorporate itself:
+
+```javascript
 var cyclicalComponent = {
   repository: 'api.commonform.org',
   publisher: 'kemitchell',
