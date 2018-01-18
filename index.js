@@ -22,8 +22,10 @@ var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
 var substitute = require('commonform-substitute')
+var xtend = require('xtend')
 
 module.exports = function load (form, options, callback) {
+  options.loaded = options.loaded || []
   // Request Caching
   var caches = options.caches || {}
   caches.forms = caches.forms || {}
@@ -105,9 +107,18 @@ module.exports = function load (form, options, callback) {
       function (error, publication) {
         if (error) return callback(error)
         if (publication === false) return callback(couldNotLoad(element))
-        loadForm(repository, publication.digest, function (error, form) {
+        var digest = publication.digest
+        if (options.loaded.indexOf(digest) !== -1) {
+          var cycleError = new Error('cycle')
+          cycleError.digest = digest
+          return callback(cycleError)
+        }
+        loadForm(repository, digest, function (error, form) {
           if (error) return callback(error)
-          load(form, options, function (error, form) {
+          var newOptions = xtend(options, {
+            loaded: options.loaded.concat(digest)
+          })
+          load(form, newOptions, function (error, form) {
             if (error) return callback(error)
             var result = {form: substitute(form, element.substitutions)}
             if (element.heading) result.heading = element.heading

@@ -71,4 +71,49 @@ loadComponents(
     )
   }
 )
+
+var cyclicalComponent = {
+  repository: 'api.commonform.org',
+  publisher: 'kemitchell',
+  project: 'cyclical',
+  edition: '1e',
+  substitutions: {terms: {}, headings: {}}
+}
+
+var cyclicalDigest = new Array(65).join('a')
+
+loadComponents(
+  {content: [cyclicalComponent]},
+  {
+    caches: {
+      forms: {
+        get: function (repository, digest, callback) {
+          if (digest === cyclicalDigest) {
+            callback(null, {content: [cyclicalComponent]})
+          } else {
+            callback(null, false)
+          }
+        }
+      },
+      publications: {
+        get: function (repository, publisher, project, edition, callback) {
+          if (
+            repository === cyclicalComponent.repository &&
+            publisher === cyclicalComponent.publisher &&
+            project === cyclicalComponent.project &&
+            edition === cyclicalComponent.edition
+          ) {
+            callback(null, {digest: cyclicalDigest})
+          } else {
+            callback(null, false)
+          }
+        }
+      }
+    }
+  },
+  function (error) {
+    assert.equal(error.message, 'cycle')
+    assert.equal(error.digest, cyclicalDigest)
+  }
+)
 ```
