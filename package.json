@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
   "dependencies": {
+    "commonform-get-editions": "^1.0.0",
     "commonform-get-form": "^2.0.0",
     "commonform-get-publication": "^2.0.0",
     "commonform-substitute": "^1.0.0",
-    "json-parse-errback": "^2.0.1",
     "reviewers-edition-compare": "^1.0.5",
     "reviewers-edition-upgrade": "^1.0.2",
     "run-parallel-limit": "^1.0.3",

@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+var getEditions = require('commonform-get-editions')
 var getForm = require('commonform-get-form')
 var getPublication = require('commonform-get-publication')
-var https = require('https')
-var parse = require('json-parse-errback')
 var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
@@ -175,38 +174,6 @@ function couldNotLoad (element) {
   var returned = new Error('could not load component')
   returned.component = element
   return returned
-}
-
-function getEditions (host, publisher, project, callback) {
-  https.request({
-    host: host,
-    path: (
-      '/publishers/' + publisher +
-      '/projects/' + project +
-      '/publications'
-    )
-  })
-    .once('response', function (response) {
-      var statusCode = response.statusCode
-      if (statusCode === 404) return callback(null, false)
-      if (statusCode !== 200) {
-        var statusError = new Error()
-        statusError.statusCode = statusCode
-        return callback(statusError)
-      }
-      var chunks = []
-      response
-        .on('data', function (chunk) {
-          chunks.push(chunk)
-        })
-        .once('error', function (error) {
-          callback(error)
-        })
-        .once('end', function () {
-          parse(Buffer.concat(chunks), callback)
-        })
-    })
-    .end()
 }
 
 function isSamePath (a, b) {
