@@ -40,7 +40,7 @@ loadComponents(
 )
 ```
 
-Automatically resolve `upgrade: true` components to the latest compatible edition:
+Automatically resolve `upgrade: 'yes'` components to the latest compatible edition:
 
 ```javascript
 loadComponents(
@@ -85,7 +85,7 @@ loadComponents(
 )
 ```
 
-You can provide precalculated resolutions for `upgrade: true` components:
+You can provide precalculated resolutions for `upgrade: 'yes'` components:
 
 ```javascript
 loadComponents(
