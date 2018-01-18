@@ -20,6 +20,7 @@ var getPublication = require('commonform-get-publication')
 var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
+var samePath = require('commonform-same-path')
 var substitute = require('commonform-substitute')
 var xtend = require('xtend')
 
@@ -48,7 +49,7 @@ module.exports = function load (form, options, callback) {
             var path = options.path.concat('content', index)
             // Check for a provided resolution.
             var resolution = options.resolutions.find(function (resolution) {
-              return isSamePath(path, resolution.path)
+              return samePath(path, resolution.path)
             })
             if (resolution) return withEdition(resolution.edition)
             // Fetch a list of available editions of the project.
@@ -174,15 +175,4 @@ function couldNotLoad (element) {
   var returned = new Error('could not load component')
   returned.component = element
   return returned
-}
-
-function isSamePath (a, b) {
-  return (
-    Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every(function (element, index) {
-      return element === b[index]
-    })
-  )
 }
