@@ -191,7 +191,7 @@ loadComponents(
 The function will yield an error when a component tries to incorporate itself:
 
 ```javascript
-var cyclicalComponent = {
+var cyclical = {
   repository: 'api.commonform.org',
   publisher: 'kemitchell',
   project: 'cyclical',
@@ -202,25 +202,27 @@ var cyclicalComponent = {
 var cyclicalDigest = new Array(65).join('a')
 
 loadComponents(
-  {content: [cyclicalComponent]},
+  {content: [cyclical]},
   {
     caches: {
       forms: {
         get: function (repository, digest, callback) {
           if (digest === cyclicalDigest) {
-            callback(null, {content: [cyclicalComponent]})
+            callback(null, {content: [cyclical]})
           } else {
             callback(null, false)
           }
         }
       },
       publications: {
-        get: function (repository, publisher, project, edition, callback) {
+        get: function (
+          repository, publisher, project, edition, callback
+        ) {
           if (
-            repository === cyclicalComponent.repository &&
-            publisher === cyclicalComponent.publisher &&
-            project === cyclicalComponent.project &&
-            edition === cyclicalComponent.edition
+            repository === cyclical.repository &&
+            publisher === cyclical.publisher &&
+            project === cyclical.project &&
+            edition === cyclical.edition
           ) {
             callback(null, {digest: cyclicalDigest})
           } else {
