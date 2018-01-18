@@ -11,10 +11,7 @@ loadComponents(
         project: 'exchange-act',
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {
-          terms: {},
-          headings: {}
-        }
+        substitutions: {terms: {}, headings: {}}
       }
     ]
   },
@@ -45,10 +42,7 @@ loadComponents(
         project: 'legal-action',
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {
-          terms: {},
-          headings: {}
-        }
+        substitutions: {terms: {}, headings: {}}
       }
     ]
   },
@@ -63,10 +57,7 @@ loadComponents(
             publisher: 'kemitchell',
             project: 'legal-action',
             edition: '1e1c',
-            substitutions: {
-              terms: {},
-              headings: {}
-            }
+            substitutions: {terms: {}, headings: {}}
           }
         ]
       },
