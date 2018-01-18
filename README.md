@@ -133,6 +133,61 @@ loadComponents(
 )
 ```
 
+The `caches` options permit caching of queries, such as for forms:
+
+```javascript
+// A simple in-memory cache. Keys are digest. Values are forms.
+var formsCache = {}
+
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        edition: '1e',
+        upgrade: 'yes',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {
+    caches: {
+      forms: {
+        get: function (repository, digest, callback) {
+          var cached = formsCache[digest]
+          if (cached) callback(null, cached)
+          else callback(null, false)
+        },
+        put: function (repository, digest, form, callback) {
+          formsCache[digest] = form
+          callback()
+        }
+      }
+      /*
+      publications: {
+        get: function (repository, publisher, project, edition, callback)
+        put: function (
+          repository, publisher, project, edition, publication, callback
+        )
+      }
+      */
+      /*
+      editions: {
+        get: function (repository, publisher, project, callback)
+        put: function (
+          repository, publisher, project, edition, editions, callback
+        )
+      }
+      */
+    }
+  },
+  function (error, upgradedForm) {
+    assert.ifError(error)
+  }
+)
+```
 The function will yield an error when a component tries to incorporate itself:
 
 ```javascript
