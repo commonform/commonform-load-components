@@ -1,7 +1,7 @@
 {
   "name": "commonform-load-components",
   "description": "replace components with the right Common Forms",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
   "dependencies": {
     "commonform-get-editions": "^1.0.0",
