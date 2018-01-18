@@ -1,5 +1,6 @@
 {
   "name": "commonform-load-components",
+  "description": "replace components with the right Common Forms",
   "version": "0.0.0",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
   "dependencies": {
