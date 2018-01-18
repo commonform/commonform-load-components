@@ -169,17 +169,38 @@ loadComponents(
       }
       /*
       publications: {
-        get: function (repository, publisher, project, edition, callback)
+        get: function (
+          repository,
+          publisher,
+          project,
+          edition,
+          callback
+        )
         put: function (
-          repository, publisher, project, edition, publication, callback
+          repository,
+          publisher,
+          project,
+          edition,
+          publication,
+          callback
         )
       }
       */
       /*
       editions: {
-        get: function (repository, publisher, project, callback)
+        get: function (
+          repository,
+          publisher,
+          project,
+          callback
+        )
         put: function (
-          repository, publisher, project, edition, editions, callback
+          repository,
+          publisher,
+          project,
+          edition,
+          editions,
+          callback
         )
       }
       */
