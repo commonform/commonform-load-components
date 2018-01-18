@@ -1,0 +1,22 @@
+{
+  "name": "commonform-load-components",
+  "version": "0.0.0",
+  "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
+  "dependencies": {
+    "commonform-get-form": "^2.0.0",
+    "commonform-get-publication": "^2.0.0",
+    "json-parse-errback": "^2.0.1",
+    "reviewers-edition-compare": "^1.0.5",
+    "reviewers-edition-upgrade": "^1.0.2",
+    "run-parallel-limit": "^1.0.3"
+  },
+  "devDependencies": {
+    "defence-cli": "^2.0.1",
+    "replace-require-self": "^1.1.1"
+  },
+  "license": "Apache-2.0",
+  "repository": "commonform/commonform-load-components",
+  "scripts": {
+    "test": "defence -i javascript README.md | replace-require-self | node"
+  }
+}
