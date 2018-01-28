@@ -31,6 +31,7 @@ module.exports = function load (form, options, callback) {
   options.resolutions = options.resolutions || []
   options.loaded = options.loaded || []
   options.path = options.path || []
+  options.repositories = options.repositories || []
 
   // Request Caching
   var caches = options.caches || {}
@@ -45,6 +46,16 @@ module.exports = function load (form, options, callback) {
     form.content.map(function (element, index) {
       return function (done) {
         if (element.hasOwnProperty('repository')) {
+          // Check the repository against any provided whitelist.
+          var repository = element.repository
+          if (
+            options.repositories.length !== 0 &&
+            options.repositories.indexOf(repository) === -1
+          ) {
+            var error = new Error('unauthorized repository: ' + repository)
+            error.repository = repository
+            return done(error)
+          }
           if (element.upgrade) {
             var path = options.path.concat('content', index)
             // Check for a provided resolution.

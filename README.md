@@ -211,6 +211,34 @@ loadComponents(
   }
 )
 ```
+
+The `repositories` option array limits repositories to a given whitelist:
+
+```javascript
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        edition: '1e',
+        upgrade: 'yes',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {repositories: ['api.different.org']},
+  function (error) {
+    assert(error)
+    assert.equal(
+      error.message, 'unauthorized repository: api.commonform.org'
+    )
+    assert.equal(error.repository, 'api.commonform.org')
+  }
+)
+```
+
 The function will yield an error when a component tries to incorporate itself:
 
 ```javascript
