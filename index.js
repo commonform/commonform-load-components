@@ -24,7 +24,7 @@ var samePath = require('commonform-same-path')
 var substitute = require('commonform-substitute')
 var xtend = require('xtend')
 
-var DEFAULT_PARALLEL_LIMIT = 5
+var DEFAULT_PARALLEL_LIMIT = 1
 
 module.exports = function load (form, options, callback) {
   // Internal Recursive State
