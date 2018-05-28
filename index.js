@@ -32,6 +32,7 @@ module.exports = function load (form, options, callback) {
   options.loaded = options.loaded || []
   options.path = options.path || []
   options.repositories = options.repositories || []
+  options._resolved = options._resolved || []
 
   // Request Caching
   var caches = options.caches || {}
@@ -56,8 +57,8 @@ module.exports = function load (form, options, callback) {
             error.repository = repository
             return done(error)
           }
+          var path = options.path.concat('content', index)
           if (element.upgrade) {
-            var path = options.path.concat('content', index)
             // Check for a provided resolution.
             var resolution = options.resolutions.find(function (resolution) {
               return samePath(path, resolution.path)
@@ -86,7 +87,7 @@ module.exports = function load (form, options, callback) {
                 var resolved = matchingEditions
                   .sort(revedCompare)
                   .reverse()[0]
-                options.resolutions.push({
+                options._resolved.push({
                   path: path,
                   edition: resolved
                 })
@@ -94,6 +95,10 @@ module.exports = function load (form, options, callback) {
               }
             )
           } else {
+            options._resolved.push({
+              path: path,
+              edition: element.edition
+            })
             withEdition(element.edition)
           }
         } else {
@@ -103,6 +108,7 @@ module.exports = function load (form, options, callback) {
         function withEdition (edition) {
           getPublicationFormAsChild(
             element,
+            path,
             element.repository,
             element.publisher,
             element.project,
@@ -116,12 +122,12 @@ module.exports = function load (form, options, callback) {
     function (error, results) {
       if (error) return callback(error)
       form.content = results
-      callback(null, form, options.resolutions)
+      callback(null, form, options._resolved)
     }
   )
 
   function getPublicationFormAsChild (
-    element,
+    element, path,
     repository, publisher, project, edition,
     callback
   ) {
@@ -139,7 +145,8 @@ module.exports = function load (form, options, callback) {
         loadForm(repository, digest, function (error, form) {
           if (error) return callback(error)
           var newOptions = xtend(options, {
-            loaded: options.loaded.concat(digest)
+            loaded: options.loaded.concat(digest),
+            path: path
           })
           load(form, newOptions, function (error, form) {
             if (error) return callback(error)
