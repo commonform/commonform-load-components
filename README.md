@@ -158,7 +158,12 @@ loadComponents(
       resolutions,
       [
         {
-          path: ['content', 0],
+          path: [ 'content', 0 ],
+          repository: 'api.commonform.org',
+          publisher: 'kemitchell',
+          project: 'legal-action',
+          upgrade: true,
+          specified: '1e',
           edition: '1e1c'
         }
       ]

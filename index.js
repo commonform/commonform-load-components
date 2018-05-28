@@ -89,6 +89,11 @@ module.exports = function load (form, options, callback) {
                   .reverse()[0]
                 options._resolved.push({
                   path: path,
+                  repository: element.repository,
+                  publisher: element.publisher,
+                  project: element.project,
+                  upgrade: true,
+                  specified: element.edition,
                   edition: resolved
                 })
                 withEdition(resolved)
@@ -97,6 +102,10 @@ module.exports = function load (form, options, callback) {
           } else {
             options._resolved.push({
               path: path,
+              repository: element.repository,
+              publisher: element.publisher,
+              project: element.project,
+              upgrade: false,
               edition: element.edition
             })
             withEdition(element.edition)
