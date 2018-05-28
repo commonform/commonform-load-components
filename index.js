@@ -146,7 +146,7 @@ module.exports = function load (form, options, callback) {
           if (error) return callback(error)
           var newOptions = xtend(options, {
             loaded: options.loaded.concat(digest),
-            path: path
+            path: path.concat('form')
           })
           load(form, newOptions, function (error, form) {
             if (error) return callback(error)
