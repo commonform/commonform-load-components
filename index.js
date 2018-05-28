@@ -86,6 +86,10 @@ module.exports = function load (form, options, callback) {
                 var resolved = matchingEditions
                   .sort(revedCompare)
                   .reverse()[0]
+                options.resolutions.push({
+                  path: path,
+                  edition: resolved
+                })
                 withEdition(resolved)
               }
             )
@@ -112,7 +116,7 @@ module.exports = function load (form, options, callback) {
     function (error, results) {
       if (error) return callback(error)
       form.content = results
-      callback(null, form)
+      callback(null, form, options.resolutions)
     }
   )
 

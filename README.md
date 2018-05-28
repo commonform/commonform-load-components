@@ -135,6 +135,37 @@ loadComponents(
 )
 ```
 
+The function calls back with its resolutions for `upgrade: 'yes'` components:
+
+```javascript
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        edition: '1e',
+        upgrade: 'yes',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {},
+  function (error, upgradedForm, resolutions) {
+    assert.ifError(error)
+    assert.deepEqual(
+      resolutions,
+      [
+        {
+          path: ['content', 0],
+          edition: '1e1c'
+        }
+      ]
+    )
+  }
+)
+```
 The `caches` options permit caching of queries, such as for forms:
 
 ```javascript
