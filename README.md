@@ -12,12 +12,19 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
-        publisher: 'kemitchell',
-        project: 'exchange-act',
-        edition: '1e',
-        upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        heading: 'Contains Component',
+        form: {
+          content: [
+            {
+              repository: 'api.commonform.org',
+              publisher: 'kemitchell',
+              project: 'exchange-act',
+              edition: '1e',
+              upgrade: 'yes',
+              substitutions: {terms: {}, headings: {}}
+            }
+          ]
+        }
       }
     ]
   },
@@ -27,10 +34,17 @@ loadComponents(
     assert.deepStrictEqual(form, {
       content: [
         {
+          heading: 'Contains Component',
           form: {
             content: [
-              {definition: 'Exchange Act'},
-              ' means the Securities Exchange Act of 1934.'
+              {
+                form: {
+                  content: [
+                    {definition: 'Exchange Act'},
+                    ' means the Securities Exchange Act of 1934.'
+                  ]
+                }
+              }
             ]
           }
         }
@@ -142,12 +156,19 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        edition: '1e',
-        upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        heading: 'Contains Component',
+        form: {
+          content: [
+            {
+              repository: 'api.commonform.org',
+              publisher: 'kemitchell',
+              project: 'legal-action',
+              edition: '1e',
+              upgrade: 'yes',
+              substitutions: {terms: {}, headings: {}}
+            }
+          ]
+        }
       }
     ]
   },
@@ -158,7 +179,7 @@ loadComponents(
       resolutions,
       [
         {
-          path: [ 'content', 0 ],
+          path: ['content', 0, 'form', 'content', 0],
           repository: 'api.commonform.org',
           publisher: 'kemitchell',
           project: 'legal-action',
@@ -170,7 +191,59 @@ loadComponents(
     )
   }
 )
+
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'test',
+        project: 'nested-components',
+        edition: '1e',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {},
+  function (error, upgradedForm, resolutions) {
+    assert.ifError(error)
+    assert.deepEqual(
+      resolutions,
+      [
+        {
+          path: ['content', 0],
+          repository: 'api.commonform.org',
+          publisher: 'test',
+          project: 'nested-components',
+          upgrade: false,
+          edition: '1e'
+        },
+        {
+          path: ['content', 0, 'form', 'content', 0],
+          repository: 'api.commonform.org',
+          publisher: 'test',
+          project: 'uses-component',
+          upgrade: false,
+          edition: '1e'
+        },
+        {
+          path: [
+            'content', 0,
+            'form', 'content', 0,
+            'form', 'content', 0
+          ],
+          repository: 'api.commonform.org',
+          publisher: 'test',
+          project: 'this-is-a-test',
+          upgrade: false,
+          edition: '1e'
+        }
+      ]
+    )
+  }
+)
 ```
+
 The `caches` options permit caching of queries, such as for forms:
 
 ```javascript

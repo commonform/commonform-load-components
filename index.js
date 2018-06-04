@@ -110,6 +110,16 @@ module.exports = function load (form, options, callback) {
             })
             withEdition(element.edition)
           }
+        } else if (element.hasOwnProperty('form')) {
+          var newOptions = xtend(options, {
+            path: options.path.concat('content', index, 'form')
+          })
+          load(element.form, newOptions, function (error, form, resolved) {
+            if (error) return done(error)
+            var child = {form: form}
+            if (element.hasOwnProperty('heading')) child.heading = element.heading
+            done(null, child)
+          })
         } else {
           done(null, element)
         }
