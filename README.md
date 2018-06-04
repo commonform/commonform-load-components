@@ -52,6 +52,42 @@ loadComponents(
     })
   }
 )
+
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'api.commonform.org',
+        publisher: 'test',
+        project: 'component-with-headings',
+        edition: '1e',
+        substitutions: {terms: {}, headings: {}}
+      }
+    ]
+  },
+  {},
+  function (error, form) {
+    assert.ifError(error)
+    assert.deepStrictEqual(form, {
+      content: [
+        {
+          form: {
+            content: [
+              {
+                heading: 'First Heading',
+                form: {content: ['First Paragraph']}
+              },
+              {
+                heading: 'Second Heading',
+                form: {content: ['Second Paragraph']}
+              }
+            ]
+          }
+        }
+      ]
+    })
+  }
+)
 ```
 
 Automatically resolve `upgrade: 'yes'` components to the latest compatible edition:
