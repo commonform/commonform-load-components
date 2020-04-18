@@ -39,7 +39,7 @@ module.exports = function load (form, options, callback) {
   caches.forms = caches.forms || {}
   caches.publications = caches.publications || {}
   caches.editions = caches.editions || {}
-  var loadEditions = cachedLoader(caches.publications, getEditions)
+  var loadEditions = cachedLoader(caches.editions, getEditions)
   var loadPublication = cachedLoader(caches.publications, getPublication)
   var loadForm = cachedLoader(caches.forms, getForm)
 
