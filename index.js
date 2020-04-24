@@ -1,6 +1,6 @@
 var getEditions = require('commonform-get-editions')
 var getForm = require('commonform-get-form')
-var getPublication = require('commonform-get-publication')
+var hash = require('commonform-hash')
 var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
@@ -21,10 +21,8 @@ module.exports = function load (form, options, callback) {
   // Request Caching
   var caches = options.caches || {}
   caches.forms = caches.forms || {}
-  caches.publications = caches.publications || {}
   caches.editions = caches.editions || {}
   var loadEditions = cachedLoader(caches.editions, getEditions)
-  var loadPublication = cachedLoader(caches.publications, getPublication)
   var loadForm = cachedLoader(caches.forms, getForm)
 
   runParallelLimit(
@@ -134,29 +132,30 @@ module.exports = function load (form, options, callback) {
     repository, publisher, project, edition,
     callback
   ) {
-    loadPublication(
+    loadForm(
       repository, publisher, project, edition,
-      function (error, publication) {
+      function (error, form) {
         if (error) return callback(error)
-        if (publication === false) return callback(couldNotLoad(element))
-        var digest = publication.digest
+        if (!form) {
+          return callback(
+            new Error('Missing Form: ' + repository + publisher + '/' + project + '/' + edition)
+          )
+        }
+        var digest = hash(form)
         if (options.loaded.indexOf(digest) !== -1) {
           var cycleError = new Error('cycle')
           cycleError.digest = digest
           return callback(cycleError)
         }
-        loadForm(repository, digest, function (error, form) {
+        var newOptions = xtend(options, {
+          loaded: options.loaded.concat(digest),
+          path: path.concat('form')
+        })
+        load(form, newOptions, function (error, form) {
           if (error) return callback(error)
-          var newOptions = xtend(options, {
-            loaded: options.loaded.concat(digest),
-            path: path.concat('form')
-          })
-          load(form, newOptions, function (error, form) {
-            if (error) return callback(error)
-            var result = {form: substitute(form, element.substitutions)}
-            if (element.heading) result.heading = element.heading
-            callback(null, result)
-          })
+          var result = {form: substitute(form, element.substitutions)}
+          if (element.heading) result.heading = element.heading
+          callback(null, result)
         })
       }
     )

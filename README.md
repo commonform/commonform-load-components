@@ -16,7 +16,7 @@ loadComponents(
         form: {
           content: [
             {
-              repository: 'api.commonform.org',
+              repository: 'commonform.org',
               publisher: 'kemitchell',
               project: 'exchange-act',
               edition: '1e',
@@ -57,7 +57,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'test',
         project: 'component-with-headings',
         edition: '1e',
@@ -97,7 +97,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'kemitchell',
         project: 'legal-action',
         // Use 1e, but upgrade if possible.
@@ -114,7 +114,7 @@ loadComponents(
       {
         content: [
           {
-            repository: 'api.commonform.org',
+            repository: 'commonform.org',
             publisher: 'kemitchell',
             project: 'legal-action',
             // Use 1e1c specifically.
@@ -142,7 +142,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'kemitchell',
         project: 'legal-action',
         edition: '1e',
@@ -165,7 +165,7 @@ loadComponents(
       {
         content: [
           {
-            repository: 'api.commonform.org',
+            repository: 'commonform.org',
             publisher: 'kemitchell',
             project: 'legal-action',
             edition: '1e',
@@ -196,7 +196,7 @@ loadComponents(
         form: {
           content: [
             {
-              repository: 'api.commonform.org',
+              repository: 'commonform.org',
               publisher: 'kemitchell',
               project: 'legal-action',
               edition: '1e',
@@ -216,7 +216,7 @@ loadComponents(
       [
         {
           path: ['content', 0, 'form', 'content', 0],
-          repository: 'api.commonform.org',
+          repository: 'commonform.org',
           publisher: 'kemitchell',
           project: 'legal-action',
           upgrade: true,
@@ -232,7 +232,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'test',
         project: 'nested-components',
         edition: '1e',
@@ -243,39 +243,38 @@ loadComponents(
   {},
   function (error, upgradedForm, resolutions) {
     assert.ifError(error)
-    assert.deepEqual(
-      resolutions,
-      [
-        {
-          path: ['content', 0],
-          repository: 'api.commonform.org',
-          publisher: 'test',
-          project: 'nested-components',
-          upgrade: false,
-          edition: '1e'
-        },
-        {
-          path: ['content', 0, 'form', 'content', 0],
-          repository: 'api.commonform.org',
-          publisher: 'test',
-          project: 'uses-component',
-          upgrade: false,
-          edition: '1e'
-        },
-        {
-          path: [
-            'content', 0,
-            'form', 'content', 0,
-            'form', 'content', 0
-          ],
-          repository: 'api.commonform.org',
-          publisher: 'test',
-          project: 'this-is-a-test',
-          upgrade: false,
-          edition: '1e'
-        }
-      ]
-    )
+    var expected = [
+      {
+        path: ['content', 0],
+        repository: 'commonform.org',
+        publisher: 'test',
+        project: 'nested-components',
+        upgrade: false,
+        edition: '1e'
+      },
+      {
+        path: ['content', 0, 'form', 'content', 0],
+        repository: 'commonform.org',
+        publisher: 'test',
+        project: 'uses-component',
+        upgrade: false,
+        edition: '1e'
+      },
+      {
+        path: [
+          'content', 0,
+          'form', 'content', 0,
+          'form', 'content', 5
+        ],
+        repository: 'commonform.org',
+        publisher: 'kemitchell',
+        project: 'apache-style-license-grant',
+        upgrade: true,
+        specified: '1e',
+        edition: '1e1c'
+      }
+    ]
+    assert.deepEqual(resolutions, expected)
   }
 )
 ```
@@ -290,7 +289,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'kemitchell',
         project: 'legal-action',
         edition: '1e',
@@ -301,54 +300,32 @@ loadComponents(
   },
   {
     caches: {
-      forms: {
-        get: function (repository, digest, callback) {
-          var cached = formsCache[digest]
-          if (cached) callback(null, cached)
-          else callback(null, false)
-        },
-        put: function (repository, digest, form, callback) {
-          formsCache[digest] = form
-          callback()
-        }
-      }
-      /*
-      publications: {
-        get: function (
-          repository,
-          publisher,
-          project,
-          edition,
-          callback
-        )
-        put: function (
-          repository,
-          publisher,
-          project,
-          edition,
-          publication,
-          callback
-        )
-      }
-      */
-      /*
       editions: {
         get: function (
           repository,
           publisher,
           project,
           callback
-        )
-        put: function (
+        ) {
+          callback(null, ['1e'])
+        }
+      },
+      forms: {
+        get: function (
           repository,
           publisher,
           project,
           edition,
-          editions,
           callback
-        )
+        ) {
+          callback(null, {
+            "content": [
+              { definition: 'Legal Claim' },
+              ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
+            ]
+          })
+        }
       }
-      */
     }
   },
   function (error, upgradedForm) {
@@ -364,7 +341,7 @@ loadComponents(
   {
     content: [
       {
-        repository: 'api.commonform.org',
+        repository: 'commonform.org',
         publisher: 'kemitchell',
         project: 'legal-action',
         edition: '1e',
@@ -377,9 +354,9 @@ loadComponents(
   function (error) {
     assert(error)
     assert.equal(
-      error.message, 'unauthorized repository: api.commonform.org'
+      error.message, 'unauthorized repository: commonform.org'
     )
-    assert.equal(error.repository, 'api.commonform.org')
+    assert.equal(error.repository, 'commonform.org')
   }
 )
 ```
@@ -388,49 +365,36 @@ The function will yield an error when a component tries to incorporate itself:
 
 ```javascript
 var cyclical = {
-  repository: 'api.commonform.org',
+  repository: 'commonform.org',
   publisher: 'kemitchell',
   project: 'cyclical',
   edition: '1e',
   substitutions: {terms: {}, headings: {}}
 }
 
-var cyclicalDigest = new Array(65).join('a')
-
 loadComponents(
   {content: [cyclical]},
   {
     caches: {
       forms: {
-        get: function (repository, digest, callback) {
-          if (digest === cyclicalDigest) {
-            callback(null, {content: [cyclical]})
-          } else {
-            callback(null, false)
-          }
-        }
-      },
-      publications: {
         get: function (
           repository, publisher, project, edition, callback
         ) {
-          if (
-            repository === cyclical.repository &&
-            publisher === cyclical.publisher &&
-            project === cyclical.project &&
-            edition === cyclical.edition
-          ) {
-            callback(null, {digest: cyclicalDigest})
-          } else {
-            callback(null, false)
-          }
+          callback(null, {content: [cyclical]})
+        }
+      },
+      editions: {
+        get: function (
+          repository, publisher, project, edition, callback
+        ) {
+          callback(null, ['1e'])
         }
       }
     }
   },
   function (error) {
     assert.equal(error.message, 'cycle')
-    assert.equal(error.digest, cyclicalDigest)
+    assert(typeof error.digest === 'string')
   }
 )
 ```
