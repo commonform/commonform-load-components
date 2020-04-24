@@ -18,7 +18,7 @@
     "defence-cli": "^3.0.1",
     "replace-require-self": "^1.1.1",
     "standard": "^14.3.3",
-    "standard-markdown": "^4.0.2"
+    "standard-markdown": "^6.0.0"
   },
   "license": "BlueOak-1.0.0",
   "repository": "commonform/commonform-load-components",
