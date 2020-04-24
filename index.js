@@ -28,7 +28,7 @@ module.exports = function load (form, options, callback) {
   runParallelLimit(
     form.content.map(function (element, index) {
       return function (done) {
-        if (element.hasOwnProperty('repository')) {
+        if (has(element, 'repository')) {
           // Check the repository against any provided whitelist.
           var repository = element.repository
           if (
@@ -92,14 +92,14 @@ module.exports = function load (form, options, callback) {
             })
             withEdition(element.edition)
           }
-        } else if (element.hasOwnProperty('form')) {
+        } else if (has(element, 'form')) {
           var newOptions = xtend(options, {
             path: options.path.concat('content', index, 'form')
           })
           load(element.form, newOptions, function (error, form, resolved) {
             if (error) return done(error)
-            var child = {form: form}
-            if (element.hasOwnProperty('heading')) child.heading = element.heading
+            var child = { form: form }
+            if (has(element, 'heading')) child.heading = element.heading
             done(null, child)
           })
         } else {
@@ -153,7 +153,7 @@ module.exports = function load (form, options, callback) {
         })
         load(form, newOptions, function (error, form) {
           if (error) return callback(error)
-          var result = {form: substitute(form, element.substitutions)}
+          var result = { form: substitute(form, element.substitutions) }
           if (element.heading) result.heading = element.heading
           callback(null, result)
         })
@@ -199,4 +199,8 @@ function couldNotLoad (element) {
   var returned = new Error('could not load component')
   returned.component = element
   return returned
+}
+
+function has (object, key) {
+  return Object.prototype.hasOwnProperty.call(object, key)
 }

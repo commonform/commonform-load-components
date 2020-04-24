@@ -21,7 +21,7 @@ loadComponents(
               project: 'exchange-act',
               edition: '1e',
               upgrade: 'yes',
-              substitutions: {terms: {}, headings: {}}
+              substitutions: { terms: {}, headings: {} }
             }
           ]
         }
@@ -40,7 +40,7 @@ loadComponents(
               {
                 form: {
                   content: [
-                    {definition: 'Exchange Act'},
+                    { definition: 'Exchange Act' },
                     ' means the Securities Exchange Act of 1934.'
                   ]
                 }
@@ -61,7 +61,7 @@ loadComponents(
         publisher: 'test',
         project: 'component-with-headings',
         edition: '1e',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
@@ -75,11 +75,11 @@ loadComponents(
             content: [
               {
                 heading: 'First Heading',
-                form: {content: ['First Paragraph']}
+                form: { content: ['First Paragraph'] }
               },
               {
                 heading: 'Second Heading',
-                form: {content: ['Second Paragraph']}
+                form: { content: ['Second Paragraph'] }
               }
             ]
           }
@@ -103,11 +103,11 @@ loadComponents(
         // Use 1e, but upgrade if possible.
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
-  {limit: 1},
+  { limit: 1 },
   function (error, upgradedForm) {
     assert.ifError(error)
     loadComponents(
@@ -119,11 +119,11 @@ loadComponents(
             project: 'legal-action',
             // Use 1e1c specifically.
             edition: '1e1c',
-            substitutions: {terms: {}, headings: {}}
+            substitutions: { terms: {}, headings: {} }
           }
         ]
       },
-      {limit: 1},
+      { limit: 1 },
       function (error, fixedForm) {
         assert.ifError(error)
         assert.deepStrictEqual(
@@ -147,7 +147,7 @@ loadComponents(
         project: 'legal-action',
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
@@ -169,11 +169,11 @@ loadComponents(
             publisher: 'kemitchell',
             project: 'legal-action',
             edition: '1e',
-            substitutions: {terms: {}, headings: {}}
+            substitutions: { terms: {}, headings: {} }
           }
         ]
       },
-      {limit: 1},
+      { limit: 1 },
       function (error, fixedForm) {
         assert.ifError(error)
         assert.deepStrictEqual(
@@ -201,7 +201,7 @@ loadComponents(
               project: 'legal-action',
               edition: '1e',
               upgrade: 'yes',
-              substitutions: {terms: {}, headings: {}}
+              substitutions: { terms: {}, headings: {} }
             }
           ]
         }
@@ -236,7 +236,7 @@ loadComponents(
         publisher: 'test',
         project: 'nested-components',
         edition: '1e',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
@@ -294,7 +294,7 @@ loadComponents(
         project: 'legal-action',
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
@@ -319,7 +319,7 @@ loadComponents(
           callback
         ) {
           callback(null, {
-            "content": [
+            content: [
               { definition: 'Legal Claim' },
               ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
             ]
@@ -346,11 +346,11 @@ loadComponents(
         project: 'legal-action',
         edition: '1e',
         upgrade: 'yes',
-        substitutions: {terms: {}, headings: {}}
+        substitutions: { terms: {}, headings: {} }
       }
     ]
   },
-  {repositories: ['api.different.org']},
+  { repositories: ['different.org'] },
   function (error) {
     assert(error)
     assert.equal(
@@ -369,18 +369,18 @@ var cyclical = {
   publisher: 'kemitchell',
   project: 'cyclical',
   edition: '1e',
-  substitutions: {terms: {}, headings: {}}
+  substitutions: { terms: {}, headings: {} }
 }
 
 loadComponents(
-  {content: [cyclical]},
+  { content: [cyclical] },
   {
     caches: {
       forms: {
         get: function (
           repository, publisher, project, edition, callback
         ) {
-          callback(null, {content: [cyclical]})
+          callback(null, { content: [cyclical] })
         }
       },
       editions: {
