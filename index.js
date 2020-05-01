@@ -12,6 +12,7 @@ var DEFAULT_PARALLEL_LIMIT = 1
 
 module.exports = function load (form, options, callback) {
   // Internal Recursive State
+  options.original = options.original || false
   options.resolutions = options.resolutions || []
   options.loaded = options.loaded || []
   options.path = options.path || []
@@ -40,7 +41,7 @@ module.exports = function load (form, options, callback) {
             return done(error)
           }
           var path = options.path.concat('content', index)
-          if (element.upgrade) {
+          if (element.upgrade && !options.original) {
             // Check for a provided resolution.
             var resolution = options.resolutions.find(function (resolution) {
               return samePath(path, resolution.path)
@@ -87,7 +88,7 @@ module.exports = function load (form, options, callback) {
               repository: element.repository,
               publisher: element.publisher,
               project: element.project,
-              upgrade: false,
+              upgrade: element.upgrade === 'yes',
               edition: element.edition
             })
             withEdition(element.edition)

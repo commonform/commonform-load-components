@@ -280,6 +280,39 @@ loadComponents(
 )
 ```
 
+You can also prevent upgrades with `{ original: true }`:
+
+```javascript
+loadComponents(
+  {
+    content: [
+      {
+        repository: 'commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        edition: '1e',
+        upgrade: 'yes',
+        substitutions: { terms: {}, headings: {} }
+      }
+    ]
+  },
+  { limit: 1, original: true },
+  function (error, loaded, resolutions) {
+    assert.ifError(error)
+    assert.deepStrictEqual(resolutions, [
+      {
+        path: ['content', 0],
+        repository: 'commonform.org',
+        publisher: 'kemitchell',
+        project: 'legal-action',
+        upgrade: true,
+        edition: '1e'
+      }
+    ])
+  }
+)
+```
+
 The `caches` options permit caching of queries, such as for forms:
 
 ```javascript
