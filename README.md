@@ -257,7 +257,8 @@ loadComponents(
         repository: 'commonform.org',
         publisher: 'test',
         project: 'uses-component',
-        upgrade: false,
+        upgrade: true,
+        specified: '1e',
         edition: '1e'
       },
       {
