@@ -1,6 +1,7 @@
 var getEditions = require('commonform-get-editions')
 var getForm = require('commonform-get-form')
 var hash = require('commonform-hash')
+var predicate = require('commonform-predicate')
 var revedCompare = require('reviewers-edition-compare')
 var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
@@ -28,7 +29,7 @@ module.exports = function load (form, options, callback) {
   runParallelLimit(
     form.content.map(function (element, index) {
       return function (done) {
-        if (has(element, 'repository')) {
+        if (predicate.component(element)) {
           // Check the repository against any provided whitelist.
           var repository = element.repository
           if (
@@ -92,7 +93,7 @@ module.exports = function load (form, options, callback) {
             })
             withEdition(element.edition)
           }
-        } else if (has(element, 'form')) {
+        } else if (predicate.child(element)) {
           var newOptions = Object.assign({}, options, {
             path: options.path.concat('content', index, 'form')
           })
