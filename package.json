@@ -7,6 +7,7 @@
     "commonform-get-form": "^3.0.0",
     "commonform-hash": "^1.0.0",
     "commonform-substitute": "^1.0.0",
+    "has": "^1.0.3",
     "json-parse-errback": "^2.0.1",
     "once": "^1.4.0",
     "run-parallel-limit": "^1.0.3",

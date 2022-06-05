@@ -1,4 +1,5 @@
 var concat = require('simple-concat')
+var has = require('has')
 var hash = require('commonform-hash')
 var https = require('https')
 var once = require('once')
@@ -120,8 +121,4 @@ function downloadForm (url, callback) {
       })
     })
     .end()
-}
-
-function has (object, key) {
-  return Object.prototype.hasOwnProperty.call(object, key)
 }
