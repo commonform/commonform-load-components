@@ -22,8 +22,7 @@ module.exports = function recurse (form, options, callback) {
   runParallelLimit(
     form.content.map(function (element, index) {
       return function (done) {
-        // TODO: if (predicate.component(element)) {
-        if (has(element, 'component')) {
+        if (predicate.component(element)) {
           // Check the hostname against any provided whitelist.
           var base = element.component
           if (options.hostnames.length !== 0) {
