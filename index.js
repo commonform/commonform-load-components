@@ -17,6 +17,7 @@ module.exports = function recurse (form, options, callback) {
   options.path = options.path || []
   options.hostnames = options.hostnames || []
   var cache = options.cache = options.cache || {}
+  options.markLoaded = options.markLoaded || false
 
   runParallelLimit(
     form.content.map(function (element, index) {
@@ -96,6 +97,10 @@ module.exports = function recurse (form, options, callback) {
             if (error) return done(error)
             var result = { form: substitute(form, element.substitutions) }
             if (element.heading) result.heading = element.heading
+            if (options.markLoaded) {
+              result.loaded = true
+              result.component = element
+            }
             done(null, result)
           })
         }

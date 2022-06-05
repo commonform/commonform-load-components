@@ -8,18 +8,14 @@ var loadComponents = require('commonform-load-components')
 Replace a component with a child form:
 
 ```javascript
-The `cache` option permits caching of queries:
-
-```javascript
-// A simple in-memory cache. Keys are digest. Values are forms.
-var formsCache = {}
 var legalActionURL = 'https://example.com/legal-action'
-formsCache[legalActionURL + '/1.0.0.json'] = {
+var legalActionForm = {
   content: [
     { definition: 'Legal Claim' },
     ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
   ]
 }
+var cache
 
 loadComponents(
   {
@@ -31,22 +27,59 @@ loadComponents(
       }
     ]
   },
+  // The cache option permits caching of queries:
   {
-    cache: {
-      get: function (url, callback) {
-        callback(null, formsCache[url] || false)
-      },
-      put: function (url, form, callback) {
-        formsCache[url] = form
-        callback()
+    cache: (function() {
+      var formsCache = {}
+      formsCache[legalActionURL + '/1.0.0.json'] = legalActionForm
+      cache = {
+        get: function (url, callback) {
+          callback(null, formsCache[url] || false)
+        },
+        put: function (url, form, callback) {
+          formsCache[url] = form
+          callback()
+        }
       }
-    }
+      return cache
+    })()
   },
   function (error) {
     assert.ifError(error)
   }
 )
 ```
+
+The `markLoaded` option will add metadata to loaded forms:
+
+```javascript
+var legalActionComponent = {
+  component: legalActionURL,
+  version: '1.0.0',
+  substitutions: { terms: {}, headings: {} }
+}
+
+loadComponents(
+  { content: [ legalActionComponent ] },
+  { markLoaded: true, cache },
+  function (error, loaded) {
+    assert.ifError(error)
+    assert.deepStrictEqual(
+      loaded,
+      {
+        content: [
+          {
+            loaded: true,
+            form: legalActionForm,
+            component: legalActionComponent
+          }
+        ]
+      }
+    )
+  }
+)
+```
+
 
 The `hostnames` option array limits components to those from the given array:
 
