@@ -9,35 +9,42 @@ Replace a component with a child form:
 
 ```javascript
 var legalActionURL = 'https://example.com/legal-action'
+
+var legalActionReference = {
+  component: legalActionURL,
+  version: '1.0.0',
+  substitutions: { terms: {}, headings: {} }
+}
+
 var legalActionForm = {
   content: [
     { definition: 'Legal Claim' },
     ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
   ]
 }
+
+var legalActionComponent = {
+  publisher: 'Example Publisher',
+  name: 'Legal Action Definition',
+  version: '1.0.0',
+  form: legalActionForm
+}
+
 var cache
 
 loadComponents(
-  {
-    content: [
-      {
-        component: legalActionURL,
-        version: '1.0.0',
-        substitutions: { terms: {}, headings: {} }
-      }
-    ]
-  },
+  { content: [legalActionReference] },
   // The cache option permits caching of queries:
   {
     cache: (function() {
-      var formsCache = {}
-      formsCache[legalActionURL + '/1.0.0.json'] = legalActionForm
+      var componentsCache = {}
+      componentsCache[legalActionURL + '/1.0.0.json'] = legalActionComponent
       cache = {
         get: function (url, callback) {
-          callback(null, formsCache[url] || false)
+          callback(null, componentsCache[url] || false)
         },
-        put: function (url, form, callback) {
-          formsCache[url] = form
+        put: function (url, component, callback) {
+          componentsCache[url] = component
           callback()
         }
       }
@@ -53,14 +60,8 @@ loadComponents(
 The `markLoaded` option will add metadata to loaded forms:
 
 ```javascript
-var legalActionComponent = {
-  component: legalActionURL,
-  version: '1.0.0',
-  substitutions: { terms: {}, headings: {} }
-}
-
 loadComponents(
-  { content: [ legalActionComponent ] },
+  { content: [ legalActionReference ] },
   { markLoaded: true, cache },
   function (error, loaded) {
     assert.ifError(error)
@@ -69,8 +70,8 @@ loadComponents(
       {
         content: [
           {
-            loaded: true,
             form: legalActionForm,
+            reference: legalActionReference,
             component: legalActionComponent
           }
         ]
@@ -121,7 +122,12 @@ loadComponents(
     cache: {
       get: function (url, callback) {
         if (url === cyclicalURL + '/1.0.0.json') {
-          callback(null, { content: [cyclical] })
+          callback(null, {
+            publisher: 'Example',
+            name: 'Cyclical Component',
+            version: '1.0.0',
+            form: { content: [cyclical] }
+          })
         } else {
           callback(null, false)
         }

@@ -39,9 +39,9 @@ module.exports = function recurse (form, options, callback) {
           if (!element.component.endsWith('/')) url += '/'
           url += encodeURIComponent(element.version) + '.json'
           if (cache.get) {
-            cache.get(url, function (error, form) {
-              if (error || !form) downloadAndCache()
-              else withForm(null, form)
+            cache.get(url, function (error, component) {
+              if (error || !component) downloadAndCache()
+              else withComponent(null, component)
             })
           } else downloadAndCache()
         } else if (predicate.child(element)) {
@@ -59,30 +59,36 @@ module.exports = function recurse (form, options, callback) {
         }
 
         function downloadAndCache () {
-          downloadForm(url, function (error, form) {
-            if (error) return withForm(error)
-            if (!form) return withForm(error, false)
+          downloadComponent(url, function (error, component) {
+            if (error) return withComponent(error)
+            if (!component) return withComponent(error, false)
             if (cache.put) {
-              cache.put(url, form, function () {
+              cache.put(url, component, function () {
                 finish()
               })
             } else {
               finish()
             }
             function finish (error) {
-              withForm(error, form)
+              withComponent(error, component)
             }
           })
         }
 
-        function withForm (error, form) {
+        function withComponent (error, component) {
           if (error) return done(error)
-          if (!form) {
+          if (!component) {
             return done(
-              new Error('Missing Form: ' + base + ' version ' + element.version)
+              new Error('Missing Component: ' + base + ' version ' + element.version)
             )
           }
-          var digest = hash(form)
+          var componentForm = component.form
+          if (!componentForm) {
+            return done(
+              new Error('Invalid Component Form: ' + JSON.stringify(componentForm))
+            )
+          }
+          var digest = hash(componentForm)
           if (options.loaded.includes(digest)) {
             var cycleError = new Error('cycle')
             cycleError.digest = digest
@@ -92,13 +98,13 @@ module.exports = function recurse (form, options, callback) {
             loaded: options.loaded.concat(digest),
             path: options.path.concat('content', index, 'form')
           })
-          recurse(form, newOptions, function (error, form) {
+          recurse(componentForm, newOptions, function (error, recursedForm) {
             if (error) return done(error)
-            var result = { form: substitute(form, element.substitutions) }
+            var result = { form: substitute(recursedForm, element.substitutions) }
             if (element.heading) result.heading = element.heading
             if (options.markLoaded) {
-              result.loaded = true
-              result.component = element
+              result.reference = element
+              result.component = component
             }
             done(null, result)
           })
@@ -115,7 +121,7 @@ module.exports = function recurse (form, options, callback) {
   )
 }
 
-function downloadForm (url, callback) {
+function downloadComponent (url, callback) {
   callback = once(callback)
   https.request(url)
     .once('error', callback)
@@ -130,12 +136,10 @@ function downloadForm (url, callback) {
       }
       concat(response, function (error, buffer) {
         if (error) return callback(error)
-        parse(buffer, function (error, parsed) {
+        parse(buffer, function (error, component) {
           if (error) return callback(error)
-          if (!isObject(parsed) || !isObject(parsed.form)) {
-            return callback(null, false)
-          }
-          callback(null, parsed.form)
+          if (!isObject(component)) return callback(null, false)
+          callback(null, component)
         })
       })
     })
