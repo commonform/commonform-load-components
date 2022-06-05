@@ -6,7 +6,6 @@ var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
 var samePath = require('commonform-same-path')
 var substitute = require('commonform-substitute')
-var xtend = require('xtend')
 
 var DEFAULT_PARALLEL_LIMIT = 1
 
@@ -94,7 +93,7 @@ module.exports = function load (form, options, callback) {
             withEdition(element.edition)
           }
         } else if (has(element, 'form')) {
-          var newOptions = xtend(options, {
+          var newOptions = Object.assign({}, options, {
             path: options.path.concat('content', index, 'form')
           })
           load(element.form, newOptions, function (error, form, resolved) {
@@ -148,7 +147,7 @@ module.exports = function load (form, options, callback) {
           cycleError.digest = digest
           return callback(cycleError)
         }
-        var newOptions = xtend(options, {
+        var newOptions = Object.assign({}, options, {
           loaded: options.loaded.concat(digest),
           path: path.concat('form')
         })

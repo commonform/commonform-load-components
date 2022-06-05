@@ -11,8 +11,7 @@
     "commonform-substitute": "^1.0.0",
     "reviewers-edition-compare": "^1.0.5",
     "reviewers-edition-upgrade": "^1.0.2",
-    "run-parallel-limit": "^1.0.3",
-    "xtend": "^4.0.1"
+    "run-parallel-limit": "^1.0.3"
   },
   "devDependencies": {
     "defence-cli": "^3.0.1",
