@@ -5,7 +5,6 @@ var once = require('once')
 var parse = require('json-parse-errback')
 var runParallelLimit = require('run-parallel-limit')
 var substitute = require('commonform-substitute')
-var xtend = require('xtend')
 
 var DEFAULT_PARALLEL_LIMIT = 1
 
@@ -35,7 +34,7 @@ module.exports = function load (form, options, callback) {
               cycleError.digest = digest
               return callback(cycleError)
             }
-            var newOptions = xtend(options, {
+            var newOptions = Object.assign({}, options, {
               loaded: options.loaded.concat(digest),
               path: path.concat('form')
             })
@@ -50,7 +49,7 @@ module.exports = function load (form, options, callback) {
             })
           })
         } else if (has(element, 'form')) {
-          var newOptions = xtend(options, {
+          var newOptions = Object.assign({}, options, {
             path: options.path.concat('content', index, 'form')
           })
           load(element.form, newOptions, function (error, form, resolved) {
