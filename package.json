@@ -4,14 +4,13 @@
   "version": "2.1.0",
   "author": "Kyle E. Mitchell <kyle@kemitchell.com> (https://kemitchell.com/)",
   "dependencies": {
-    "commonform-get-editions": "^2.0.0",
     "commonform-get-form": "^3.0.0",
     "commonform-hash": "^1.0.0",
-    "commonform-same-path": "^1.0.0",
     "commonform-substitute": "^1.0.0",
-    "reviewers-edition-compare": "^1.0.5",
-    "reviewers-edition-upgrade": "^1.0.2",
+    "json-parse-errback": "^2.0.1",
+    "once": "^1.4.0",
     "run-parallel-limit": "^1.0.3",
+    "simple-concat": "^1.0.1",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
