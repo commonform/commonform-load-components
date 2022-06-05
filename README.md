@@ -16,11 +16,8 @@ loadComponents(
         form: {
           content: [
             {
-              repository: 'commonform.org',
-              publisher: 'kemitchell',
-              project: 'exchange-act',
-              edition: '1e',
-              upgrade: 'yes',
+              component: 'https://commonform.org/kemitchell/exchange-act',
+              version: '1.0.0',
               substitutions: { terms: {}, headings: {} }
             }
           ]
@@ -57,10 +54,8 @@ loadComponents(
   {
     content: [
       {
-        repository: 'commonform.org',
-        publisher: 'test',
-        project: 'component-with-headings',
-        edition: '1e',
+        component: 'https://commonform.org/test/component-with-headings',
+        version: '1.0.0',
         substitutions: { terms: {}, headings: {} }
       }
     ]
@@ -90,307 +85,66 @@ loadComponents(
 )
 ```
 
-Automatically resolve `upgrade: 'yes'` components to the latest compatible edition:
-
-```javascript
-loadComponents(
-  {
-    content: [
-      {
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        // Use 1e, but upgrade if possible.
-        edition: '1e',
-        upgrade: 'yes',
-        substitutions: { terms: {}, headings: {} }
-      }
-    ]
-  },
-  { limit: 1 },
-  function (error, upgradedForm) {
-    assert.ifError(error)
-    loadComponents(
-      {
-        content: [
-          {
-            repository: 'commonform.org',
-            publisher: 'kemitchell',
-            project: 'legal-action',
-            // Use 1e1c specifically.
-            edition: '1e1c',
-            substitutions: { terms: {}, headings: {} }
-          }
-        ]
-      },
-      { limit: 1 },
-      function (error, fixedForm) {
-        assert.ifError(error)
-        assert.deepStrictEqual(
-          upgradedForm, fixedForm
-        )
-      }
-    )
-  }
-)
-```
-
-You can provide precalculated resolutions for `upgrade: 'yes'` components:
-
-```javascript
-loadComponents(
-  {
-    content: [
-      {
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        edition: '1e',
-        upgrade: 'yes',
-        substitutions: { terms: {}, headings: {} }
-      }
-    ]
-  },
-  {
-    resolutions: [
-      {
-        path: ['content', 0],
-        edition: '1e'
-      }
-    ]
-  },
-  function (error, upgradedForm) {
-    assert.ifError(error)
-    loadComponents(
-      {
-        content: [
-          {
-            repository: 'commonform.org',
-            publisher: 'kemitchell',
-            project: 'legal-action',
-            edition: '1e',
-            substitutions: { terms: {}, headings: {} }
-          }
-        ]
-      },
-      { limit: 1 },
-      function (error, fixedForm) {
-        assert.ifError(error)
-        assert.deepStrictEqual(
-          upgradedForm, fixedForm
-        )
-      }
-    )
-  }
-)
-```
-
-The function calls back with its resolutions for `upgrade: 'yes'` components:
-
-```javascript
-loadComponents(
-  {
-    content: [
-      {
-        heading: 'Contains Component',
-        form: {
-          content: [
-            {
-              repository: 'commonform.org',
-              publisher: 'kemitchell',
-              project: 'legal-action',
-              edition: '1e',
-              upgrade: 'yes',
-              substitutions: { terms: {}, headings: {} }
-            }
-          ]
-        }
-      }
-    ]
-  },
-  {},
-  function (error, upgradedForm, resolutions) {
-    assert.ifError(error)
-    assert.deepEqual(
-      resolutions,
-      [
-        {
-          path: ['content', 0, 'form', 'content', 0],
-          repository: 'commonform.org',
-          publisher: 'kemitchell',
-          project: 'legal-action',
-          upgrade: true,
-          specified: '1e',
-          edition: '1e1c'
-        }
-      ]
-    )
-  }
-)
-
-loadComponents(
-  {
-    content: [
-      {
-        repository: 'commonform.org',
-        publisher: 'test',
-        project: 'nested-components',
-        edition: '1e',
-        substitutions: { terms: {}, headings: {} }
-      }
-    ]
-  },
-  {},
-  function (error, upgradedForm, resolutions) {
-    assert.ifError(error)
-    var expected = [
-      {
-        path: ['content', 0],
-        repository: 'commonform.org',
-        publisher: 'test',
-        project: 'nested-components',
-        upgrade: false,
-        edition: '1e'
-      },
-      {
-        path: ['content', 0, 'form', 'content', 0],
-        repository: 'commonform.org',
-        publisher: 'test',
-        project: 'uses-component',
-        upgrade: true,
-        specified: '1e',
-        edition: '1e'
-      },
-      {
-        path: [
-          'content', 0,
-          'form', 'content', 0,
-          'form', 'content', 5
-        ],
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'apache-style-license-grant',
-        upgrade: true,
-        specified: '1e',
-        edition: '1e1c'
-      }
-    ]
-    assert.deepEqual(resolutions, expected)
-  }
-)
-```
-
-You can also prevent upgrades with `{ original: true }`:
-
-```javascript
-loadComponents(
-  {
-    content: [
-      {
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        edition: '1e',
-        upgrade: 'yes',
-        substitutions: { terms: {}, headings: {} }
-      }
-    ]
-  },
-  { limit: 1, original: true },
-  function (error, loaded, resolutions) {
-    assert.ifError(error)
-    assert.deepStrictEqual(resolutions, [
-      {
-        path: ['content', 0],
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        upgrade: true,
-        edition: '1e'
-      }
-    ])
-  }
-)
-```
-
-The `caches` options permit caching of queries, such as for forms:
+The `cache` option permits caching of queries:
 
 ```javascript
 // A simple in-memory cache. Keys are digest. Values are forms.
 var formsCache = {}
+var legalActionURL = 'https://example.com/legal-action'
+formsCache[legalActionURL + '/1.0.0.json'] = {
+  content: [
+    { definition: 'Legal Claim' },
+    ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
+  ]
+}
 
 loadComponents(
   {
     content: [
       {
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        edition: '1e',
-        upgrade: 'yes',
+        component: legalActionURL,
+        version: '1.0.0',
         substitutions: { terms: {}, headings: {} }
       }
     ]
   },
   {
-    caches: {
-      editions: {
-        get: function (
-          repository,
-          publisher,
-          project,
-          callback
-        ) {
-          callback(null, ['1e'])
-        }
+    cache: {
+      get: function (url, callback) {
+        callback(null, formsCache[url] || false)
       },
-      forms: {
-        get: function (
-          repository,
-          publisher,
-          project,
-          edition,
-          callback
-        ) {
-          callback(null, {
-            content: [
-              { definition: 'Legal Claim' },
-              ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
-            ]
-          })
-        }
+      put: function (url, form, callback) {
+        formsCache[url] = form
+        callback()
       }
     }
   },
-  function (error, upgradedForm) {
+  function (error) {
     assert.ifError(error)
   }
 )
 ```
 
-The `repositories` option array limits repositories to a given whitelist:
+The `hostnames` option array limits components to those from the given array:
 
 ```javascript
 loadComponents(
   {
     content: [
       {
-        repository: 'commonform.org',
-        publisher: 'kemitchell',
-        project: 'legal-action',
-        edition: '1e',
-        upgrade: 'yes',
+        component: 'https://example.com/component',
+        version: '1.0.0',
         substitutions: { terms: {}, headings: {} }
       }
     ]
   },
-  { repositories: ['different.org'] },
+  { hostnames: ['other.org'] },
   function (error) {
     assert(error)
     assert.equal(
-      error.message, 'unauthorized repository: commonform.org'
+      error.message, 'unauthorized hostname: example.com'
     )
-    assert.equal(error.repository, 'commonform.org')
+    assert.equal(error.hostname, 'example.com')
   }
 )
 ```
@@ -398,30 +152,22 @@ loadComponents(
 The function will yield an error when a component tries to incorporate itself:
 
 ```javascript
+var cyclicalURL = 'https://example.com/cyclical'
 var cyclical = {
-  repository: 'commonform.org',
-  publisher: 'kemitchell',
-  project: 'cyclical',
-  edition: '1e',
+  component: cyclicalURL,
+  version: '1.0.0',
   substitutions: { terms: {}, headings: {} }
 }
 
 loadComponents(
   { content: [cyclical] },
   {
-    caches: {
-      forms: {
-        get: function (
-          repository, publisher, project, edition, callback
-        ) {
+    cache: {
+      get: function (url, callback) {
+        if (url === cyclicalURL + '/1.0.0.json') {
           callback(null, { content: [cyclical] })
-        }
-      },
-      editions: {
-        get: function (
-          repository, publisher, project, edition, callback
-        ) {
-          callback(null, ['1e'])
+        } else {
+          callback(null, false)
         }
       }
     }

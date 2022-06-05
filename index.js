@@ -1,104 +1,54 @@
-var getEditions = require('commonform-get-editions')
-var getForm = require('commonform-get-form')
+var concat = require('simple-concat')
 var has = require('has')
 var hash = require('commonform-hash')
+var https = require('https')
+var isObject = require('is-object')
+var once = require('once')
+var parse = require('json-parse-errback')
 var predicate = require('commonform-predicate')
-var revedCompare = require('reviewers-edition-compare')
-var revedUpgrade = require('reviewers-edition-upgrade')
 var runParallelLimit = require('run-parallel-limit')
-var samePath = require('commonform-same-path')
 var substitute = require('commonform-substitute')
 
 var DEFAULT_PARALLEL_LIMIT = 1
 
-module.exports = function load (form, options, callback) {
+module.exports = function recurse (form, options, callback) {
   // Internal Recursive State
-  options.original = options.original || false
-  options.resolutions = options.resolutions || []
   options.loaded = options.loaded || []
   options.path = options.path || []
-  options.repositories = options.repositories || []
-  options._resolved = options._resolved || []
-
-  // Request Caching
-  var caches = options.caches || {}
-  caches.forms = caches.forms || {}
-  caches.editions = caches.editions || {}
-  var loadEditions = cachedLoader(caches.editions, getEditions)
-  var loadForm = cachedLoader(caches.forms, getForm)
+  options.hostnames = options.hostnames || []
+  var cache = options.cache = options.cache || {}
 
   runParallelLimit(
     form.content.map(function (element, index) {
       return function (done) {
-        if (predicate.component(element)) {
-          // Check the repository against any provided whitelist.
-          var repository = element.repository
-          if (
-            options.repositories.length !== 0 &&
-            options.repositories.indexOf(repository) === -1
-          ) {
-            var error = new Error('unauthorized repository: ' + repository)
-            error.repository = repository
-            return done(error)
+        // TODO: if (predicate.component(element)) {
+        if (has(element, 'component')) {
+          // Check the hostname against any provided whitelist.
+          var base = element.component
+          if (options.hostnames.length !== 0) {
+            var parsed = new URL(base)
+            var hostname = parsed.hostname
+            if (!options.hostnames.includes(hostname)) {
+              var error = new Error('unauthorized hostname: ' + hostname)
+              error.hostname = hostname
+              return done(error)
+            }
           }
-          var path = options.path.concat('content', index)
-          if (element.upgrade && !options.original) {
-            // Check for a provided resolution.
-            var resolution = options.resolutions.find(function (resolution) {
-              return samePath(path, resolution.path)
+          // Get the component from cache or the Web.
+          var url = element.component
+          if (!element.component.endsWith('/')) url += '/'
+          url += encodeURIComponent(element.version) + '.json'
+          if (cache.get) {
+            cache.get(url, function (error, form) {
+              if (error || !form) downloadAndCache()
+              else withForm(null, form)
             })
-            if (resolution) return withEdition(resolution.edition)
-            // Fetch a list of available editions of the project.
-            loadEditions(
-              element.repository,
-              element.publisher,
-              element.project,
-              function (error, editions) {
-                if (error) return done(error)
-                if (editions === false) return callback(couldNotLoad(element))
-                // Find editions we can upgrade to.
-                var matchingEditions = editions
-                  .filter(function (availableEdition) {
-                    return (
-                      availableEdition === element.edition ||
-                      revedUpgrade(element.edition, availableEdition)
-                    )
-                  })
-                if (matchingEditions.length === 0) {
-                  return callback(couldNotLoad(element))
-                }
-                // Find the latest edition we can upgrade to.
-                var resolved = matchingEditions
-                  .sort(revedCompare)
-                  .reverse()[0]
-                options._resolved.push({
-                  path: path,
-                  repository: element.repository,
-                  publisher: element.publisher,
-                  project: element.project,
-                  upgrade: true,
-                  specified: element.edition,
-                  edition: resolved
-                })
-                withEdition(resolved)
-              }
-            )
-          } else {
-            options._resolved.push({
-              path: path,
-              repository: element.repository,
-              publisher: element.publisher,
-              project: element.project,
-              upgrade: element.upgrade === 'yes',
-              edition: element.edition
-            })
-            withEdition(element.edition)
-          }
+          } else downloadAndCache()
         } else if (predicate.child(element)) {
           var newOptions = Object.assign({}, options, {
             path: options.path.concat('content', index, 'form')
           })
-          load(element.form, newOptions, function (error, form, resolved) {
+          recurse(element.form, newOptions, function (error, form) {
             if (error) return done(error)
             var child = { form: form }
             if (has(element, 'heading')) child.heading = element.heading
@@ -108,97 +58,82 @@ module.exports = function load (form, options, callback) {
           done(null, element)
         }
 
-        function withEdition (edition) {
-          getPublicationFormAsChild(
-            element,
-            path,
-            element.repository,
-            element.publisher,
-            element.project,
-            edition,
-            done
-          )
+        function downloadAndCache () {
+          downloadForm(url, function (error, form) {
+            if (error) return withForm(error)
+            if (!form) return withForm(error, false)
+            if (cache.put) {
+              cache.put(url, form, function () {
+                finish()
+              })
+            } else {
+              finish()
+            }
+            function finish (error) {
+              withForm(error, form)
+            }
+          })
+        }
+
+        function withForm (error, form) {
+          if (error) return done(error)
+          if (!form) {
+            return done(
+              new Error('Missing Form: ' + base + ' version ' + element.version)
+            )
+          }
+          var digest = hash(form)
+          if (options.loaded.includes(digest)) {
+            var cycleError = new Error('cycle')
+            cycleError.digest = digest
+            return done(cycleError)
+          }
+          var newOptions = Object.assign({}, options, {
+            loaded: options.loaded.concat(digest),
+            path: options.path.concat('content', index, 'form')
+          })
+          recurse(form, newOptions, function (error, form) {
+            if (error) return done(error)
+            var result = { form: substitute(form, element.substitutions) }
+            if (element.heading) result.heading = element.heading
+            done(null, result)
+          })
         }
       }
     }),
     options.limit || DEFAULT_PARALLEL_LIMIT,
     function (error, results) {
+      // The callback should only be called here.
       if (error) return callback(error)
       form.content = results
       callback(null, form, options._resolved)
     }
   )
-
-  function getPublicationFormAsChild (
-    element, path,
-    repository, publisher, project, edition,
-    callback
-  ) {
-    loadForm(
-      repository, publisher, project, edition,
-      function (error, form) {
-        if (error) return callback(error)
-        if (!form) {
-          return callback(
-            new Error('Missing Form: ' + repository + publisher + '/' + project + '/' + edition)
-          )
-        }
-        var digest = hash(form)
-        if (options.loaded.indexOf(digest) !== -1) {
-          var cycleError = new Error('cycle')
-          cycleError.digest = digest
-          return callback(cycleError)
-        }
-        var newOptions = Object.assign({}, options, {
-          loaded: options.loaded.concat(digest),
-          path: path.concat('form')
-        })
-        load(form, newOptions, function (error, form) {
-          if (error) return callback(error)
-          var result = { form: substitute(form, element.substitutions) }
-          if (element.heading) result.heading = element.heading
-          callback(null, result)
-        })
-      }
-    )
-  }
-
-  function cachedLoader (cache, get) {
-    // Number of non-callback arguments `get` takes:
-    var arity = get.length - 1
-    return function (/* arguments */) {
-      var args = Array.prototype.slice.call(arguments)
-      var query = args.slice(0, arity)
-      var callback = args[arity]
-      if (cache.get) {
-        cache.get.apply(cache, query.concat(function (error, data) {
-          if (error || data === false) {
-            get.apply(null, query.concat(finish))
-          } else {
-            finish(null, data)
-          }
-        }))
-      } else {
-        get.apply(null, query.concat(finish))
-      }
-
-      function finish (error, data) {
-        if (error) return callback(error)
-        if (data === false) return callback(null, false)
-        if (cache.put) {
-          cache.put.apply(cache, query.concat(data).concat(function () {
-            callback(null, data)
-          }))
-        } else {
-          callback(null, data)
-        }
-      }
-    }
-  }
 }
 
-function couldNotLoad (element) {
-  var returned = new Error('could not load component')
-  returned.component = element
-  return returned
+function downloadForm (url, callback) {
+  callback = once(callback)
+  https.request(url)
+    .once('error', callback)
+    .once('timeout', callback)
+    .once('response', function (response) {
+      var statusCode = response.statusCode
+      if (statusCode === 404) return callback(null, false)
+      if (statusCode !== 200) {
+        var statusError = new Error()
+        statusError.statusCode = statusCode
+        return callback(statusError)
+      }
+      concat(response, function (error, buffer) {
+        if (error) return callback(error)
+        parse(buffer, function (error, parsed) {
+          if (error) return callback(error)
+          if (!isObject(parsed) || !isObject(parsed.form)) {
+            return callback(null, false)
+          }
+          callback(null, parsed.form)
+        })
+      })
+    })
+    .end()
 }
