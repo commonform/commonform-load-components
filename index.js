@@ -1,5 +1,6 @@
 var getEditions = require('commonform-get-editions')
 var getForm = require('commonform-get-form')
+var has = require('has')
 var hash = require('commonform-hash')
 var predicate = require('commonform-predicate')
 var revedCompare = require('reviewers-edition-compare')
@@ -200,8 +201,4 @@ function couldNotLoad (element) {
   var returned = new Error('could not load component')
   returned.component = element
   return returned
-}
-
-function has (object, key) {
-  return Object.prototype.hasOwnProperty.call(object, key)
 }
