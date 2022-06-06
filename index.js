@@ -61,7 +61,7 @@ module.exports = function recurse (form, options, callback) {
         function downloadAndCache () {
           downloadComponent(url, function (error, component) {
             if (error) return withComponent(error)
-            if (!component) return withComponent(error, false)
+            if (!component) return withComponent(null, false)
             if (cache.put) {
               cache.put(url, component, function () {
                 finish()
