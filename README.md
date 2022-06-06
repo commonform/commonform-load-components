@@ -3,42 +3,65 @@ replace components with the right Common Forms
 ```javascript
 var assert = require('assert')
 var loadComponents = require('commonform-load-components')
-```
 
-Replace a component with a child form:
+// The URL of the component we'll be using.
+var toyDisclaimerURL = 'https://example.com/toy-disclaimer'
+// The version we'll be referencing.
+var version = '1.0.0'
 
-```javascript
-var legalActionURL = 'https://example.com/legal-action'
-
-var legalActionReference = {
-  component: legalActionURL,
-  version: '1.0.0',
-  substitutions: { terms: {}, headings: {} }
-}
-
-var legalActionForm = {
+// The component form we'll be incorporating by reference.
+var toyDisclaimerForm = {
   content: [
-    { definition: 'Legal Claim' },
-    ' means any legal action or claim, ignoring the historical distinction between "in law" and "in equity".'
+    'Except under ', { reference: 'Warranties' },
+    ', the ', { use: 'Seller' },
+    ' disclaims all liability to the ', { use: 'Buyer' },
+    ' related to the ', { use: 'Product' }, '.'
   ]
 }
 
-var legalActionComponent = {
+// A reference to the component, as it might appear in a Common Form.
+var toyDisclaimerReference = {
+  component: toyDisclaimerURL,
+  version,
+  substitutions: {
+    terms: {
+      Seller: 'Vendor',
+      Buyer: 'Customer',
+      Product: 'Software'
+    },
+    headings: {
+      Warranties: 'Quality Assurance'
+    }
+  }
+}
+
+// The component form with all terms and headings substitutions applied.
+var toyDisclaimerSubstituted = {
+  content: [
+    'Except under ', { reference: 'Quality Assurance' /* was Warranties */},
+    ', the ', { use: 'Vendor' /* was Seller */},
+    ' disclaims all liability to the ', { use: 'Customer' /* was Buyer */},
+    ' related to the ', { use: 'Software' /* was Product */}, '.'
+  ]
+}
+
+// The component record that would be stored on example.com.
+var toyDisclaimerComponent = {
   publisher: 'Example Publisher',
   name: 'Legal Action Definition',
-  version: '1.0.0',
-  form: legalActionForm
+  version,
+  form: toyDisclaimerForm
 }
 
 var cache
 
 loadComponents(
-  { content: [legalActionReference] },
+  { content: [toyDisclaimerReference] },
   // The cache option permits caching of queries:
   {
     cache: (function() {
       var componentsCache = {}
-      componentsCache[legalActionURL + '/1.0.0.json'] = legalActionComponent
+      componentsCache[toyDisclaimerURL + '/' + version + '.json'] = toyDisclaimerComponent
       cache = {
         get: function (url, callback) {
           callback(null, componentsCache[url] || false)
@@ -51,8 +74,12 @@ loadComponents(
       return cache
     })()
   },
-  function (error) {
+  function (error, loaded) {
     assert.ifError(error)
+    assert.deepStrictEqual(
+      loaded,
+      { content: [{ form: toyDisclaimerSubstituted }] }
+    )
   }
 )
 ```
@@ -61,7 +88,7 @@ The `markLoaded` option will add metadata to loaded forms:
 
 ```javascript
 loadComponents(
-  { content: [ legalActionReference ] },
+  { content: [ toyDisclaimerReference ] },
   { markLoaded: true, cache },
   function (error, loaded) {
     assert.ifError(error)
@@ -70,9 +97,9 @@ loadComponents(
       {
         content: [
           {
-            form: legalActionForm,
-            reference: legalActionReference,
-            component: legalActionComponent
+            form: toyDisclaimerSubstituted,
+            reference: toyDisclaimerReference,
+            component: toyDisclaimerComponent
           }
         ]
       }
